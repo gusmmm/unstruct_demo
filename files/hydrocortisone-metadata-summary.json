@@ -1,0 +1,18 @@
+{
+  "element_counts": {
+    "Header": 16,
+    "Title": 41,
+    "UncategorizedText": 171,
+    "NarrativeText": 85,
+    "Image": 4,
+    "PageBreak": 16,
+    "FigureCaption": 2,
+    "Table": 8,
+    "ListItem": 37
+  },
+  "languages": [
+    "eng"
+  ],
+  "num_pages": 16,
+  "document_title": "ORIGINAL"
+}

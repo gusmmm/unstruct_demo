@@ -1,0 +1,26 @@
+[
+  {
+    "element_id": "329f3aa64ef64cfeffa42dbed27c69ee",
+    "summary": "This image displays the Springer logo, which features a stylized horse's head in navy blue, accompanied by the word \"Springer\" in the same color. Below the horse's head is an orange horizontal line. This logo is likely present to indicate the publisher of the clinical research paper being analyzed. It does not contain any data related to trial flow, results, or outcomes.",
+    "model": "gemini-2.5-flash-lite",
+    "has_image": true
+  },
+  {
+    "element_id": "fded8f83e75e97e27e2eb8de03698b53",
+    "summary": "The image displays a circular icon with a bookmark symbol inside, suggesting a feature related to tracking or saving information. Below the icon, the text \"Check for updates\" is prominently displayed. This likely indicates a function within a software or application that allows users to monitor and install new versions or content. In the context of a clinical research paper, this could relate to a digital platform used for data management, analysis, or dissemination, where staying updated is crucial for accessing the latest findings or features.",
+    "model": "gemini-2.5-flash-lite",
+    "has_image": true
+  },
+  {
+    "element_id": "614d102326353c383d7c49f8746f94da",
+    "summary": "This figure illustrates the REMAP CAP Corticosteroid Domain trial flow. A total of 22,568 patients were screened, with 11,410 enrolled in at least one REMAP-CAP domain. Of these, 945 were enrolled in the Corticosteroid Domain, randomized into three arms: No Corticosteroid (125 patients), Fixed-Course Hydrocortisone (553 patients), and Another corticosteroid arm (267 patients). After accounting for withdrawals and unavailable outcomes, 122 patients were included in the final analysis for the \"No Corticosteroid\" arm, 521 for \"Fixed-Course Hydrocortisone,\" and 258 for \"Another corticosteroid arm.\" An additional 3,045 patients were eligible for covariate adjustment.",
+    "model": "gemini-2.5-flash-lite",
+    "has_image": true
+  },
+  {
+    "element_id": "672dfcbed639bbf20c1a647d6719830e",
+    "summary": "This Kaplan-Meier curve displays day 90 survival probability for patients randomized to hydrocortisone or control. The hydrocortisone group, with 535 patients, shows a higher survival probability than the control group, which started with 122 patients. At day 90, the survival probability for hydrocortisone is approximately 0.86, while for the control group it is around 0.82. The number at risk table shows a substantial decrease in the control group over time compared to the hydrocortisone group. This figure illustrates the primary outcome of the study, comparing survival between the two treatment arms.",
+    "model": "gemini-2.5-flash-lite",
+    "has_image": true
+  }
+]
