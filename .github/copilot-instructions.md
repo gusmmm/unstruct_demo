@@ -40,3 +40,9 @@
 
 # google genai agents
 - for all code related google genai AI agents check https://github.com/googleapis/python-genai
+
+# gemini embeddings
+- for gemini embeddings, check this url https://ai.google.dev/gemini-api/docs/embeddings?hl=en and this https://github.com/google-gemini/cookbook/blob/main/quickstarts/Embeddings.ipynb for upto-date information and examples.
+
+# vector database with chromadb
+- for vector database with chromadb, check this url https://github.com/google-gemini/cookbook/blob/23a8e7d7e88009e316275947db53ddb6630d38dd/examples/chromadb/Vectordb_with_chroma.ipynb for upto-date information and examples.
