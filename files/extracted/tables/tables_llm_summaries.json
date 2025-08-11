@@ -3,7 +3,7 @@
     "element_id": "dc2a82517efea79282ff25605fb9d8b8",
     "page_number": 6,
     "caption": "Table 1 Participant characteristics at baseline",
-    "summary": "Table 1 compares baseline characteristics of participants receiving hydrocortisone versus control, across two study subsets. Key variables include shock status, age, sex, race/ethnicity, comorbidities like diabetes and kidney disease, and respiratory support. The hydrocortisone and control groups generally show similar distributions across most demographic and clinical factors. For instance, age, sex, and the prevalence of most comorbidities are comparable between treatment groups within each subset. However, the hydrocortisone group in the first subset had a slightly higher proportion of patients with \"Other\" race/ethnicity (20.2% vs. 34.1% in control). The PaO2/FiO2 ratio and SOFA scores also show minor differences between groups and subsets.",
+    "summary": "This table compares baseline characteristics of participants receiving hydrocortisone versus control, across two study strata. Key variables include shock status, age, race/ethnicity, comorbidities like diabetes and kidney disease, and respiratory support. For example, the median age was around 60-63 years across all groups. The hydrocortisone group generally had slightly higher rates of shock with influenza and lower rates of kidney disease compared to the control group. Respiratory support methods like invasive mechanical ventilation and high-flow nasal cannula were common in both treatment arms.",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -12,7 +12,7 @@
     "element_id": "971134d38d3691f2bbe7bc04bf6f0007",
     "page_number": 7,
     "caption": "Table 1 (continued)",
-    "summary": "This table presents the geographical distribution of patients randomized to hydrocortisone or control treatments. It shows the number and percentage of patients from Asia, Australia, Europe, and North America within each treatment group. The majority of patients in both hydrocortisone and control arms were from Australia (around 57-61%) and Europe (around 31-33%). There were very few patients from Asia (0-3.4%) and a smaller proportion from North America (around 7-11%).",
+    "summary": "This table presents the geographical distribution of patients randomized to hydrocortisone or control treatments. It shows the number and percentage of patients from Asia, Australia, Europe, and North America within each treatment group. The majority of patients in both hydrocortisone and control groups were from Australia (around 57-61%) and Europe (around 31-33%). There were very few patients from Asia (0-3.4%) and a moderate number from North America (6.7-10.6%).",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -21,7 +21,7 @@
     "element_id": "a42e4e2527a3381cb91358929e958104",
     "page_number": 9,
     "caption": "Table 2 Primary outcome and sensitivity analyses in the full dataset",
-    "summary": "This table presents primary and sensitivity analyses for 90-day mortality in patients receiving hydrocortisone versus control. It stratifies results by vasopressor-dependent shock and influenza status. The primary analysis shows a median adjusted odds ratio (OR) of 1.52 (95% credible interval [CrI] 0.69–3.56) for hydrocortisone in the full model. Across subgroups, the adjusted ORs for hydrocortisone ranged from 1.53 to 1.79, with 95% CrIs generally including 1. The probability of superiority for hydrocortisone was between 9.2% and 15.7%.",
+    "summary": "This table presents primary and sensitivity analyses for 90-day mortality in patients receiving hydrocortisone versus control. It examines outcomes based on vasopressor-dependent shock and influenza status. The adjusted odds ratios (OR) for hydrocortisone compared to control generally range from 1.52 to 1.79, with 95% credible intervals (CrI) that include 1 in most subgroups. For the full dataset, the probability of superiority for hydrocortisone was 15.7%, and the probability of harm was 84.3%.",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -30,7 +30,7 @@
     "element_id": "587c58384315e5acf52604d5d60d2c93",
     "page_number": 9,
     "caption": "Table 2 Primary outcome and sensitivity analyses in the full dataset",
-    "summary": "This table presents primary outcome and sensitivity analyses on a full dataset, evaluating treatment effects across different strata. Key metrics include the probability of a >20% reduction in the odds of death, median and mean adjusted odds ratios (OR) with 95% credible intervals (CrI), and probabilities of superiority and harm. For instance, one stratum shows a median adjusted OR of 1.21 (0.19–8.96) and a 42.3% probability of superiority. Another stratum indicates a median adjusted OR of 1.56 (0.80–3.31) with a 10% probability of superiority and 90% probability of harm. The data suggests varying treatment effectiveness and risk profiles across the analyzed groups.",
+    "summary": "This table presents primary outcome and sensitivity analyses on a full dataset. It reports probabilities of superiority and harm, along with median and mean adjusted odds ratios (OR) with 95% credible intervals (CrI) for different treatment strata. For instance, one stratum shows a median adjusted OR of 1.21 (0.19–8.96) and a mean adjusted OR of 2.05 (SD 2.81). The probabilities of superiority range from 10% to 42.3%, while probabilities of harm range from 57.7% to 89.6% across the strata. The table also assesses the probability of a greater than 20% reduction in the odds of death, with values varying across the analyzed groups.",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -39,7 +39,7 @@
     "element_id": "41955ae83595c84a076279cbd7c4f1d8",
     "page_number": 9,
     "caption": "No caption",
-    "summary": "This table presents results from sensitivity analyses of a clinical study, likely examining treatment effects. It reports adjusted odds ratios (OR) with 95% credible intervals (CrI), indicating the strength and precision of the association. The values for the ORs range from 1.45 to 1.49, with the lower bounds of the CrIs generally above 0.69, suggesting a potential positive treatment effect. Standard deviations (SD) are also provided, ranging from 12.0 to 13.9. The table also shows high probabilities of superiority (86.1% to 88.0%) and low probabilities of harm (0% to 13.8%), indicating a favorable treatment outcome across different analytical approaches.",
+    "summary": "This table presents results from sensitivity analyses for a clinical study, likely examining treatment effects. It reports adjusted odds ratios (OR) with 95% credible intervals (CrI), indicating the strength and precision of the association. The mean ORs range from 1.45 to 1.49 across different analyses. Standard deviations (SD) for key variables are also provided, ranging from 12.0 to 13.9. The table also shows high probabilities of superiority (86.1% to 88.0%) and low probabilities of harm (not explicitly stated but implied by high superiority).",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -48,7 +48,7 @@
     "element_id": "7d0c08660f93230f81c40a9dea67717b",
     "page_number": 10,
     "caption": "Table 2 (continued)",
-    "summary": "This table presents 90-day mortality data for patients receiving hydrocortisone versus a control group. The primary outcome is the probability of a greater than 20% reduction in the odds of death. For the hydrocortisone group (n=536), the probability of this outcome was 6.5%, with a credible interval of 5.2% to 6.6%. The control group (n=122) had a probability of 5.4%. The analysis adjusted for multiple clinical factors. Odds ratios less than 1 indicate improved outcomes, while odds ratios greater than 1 indicate harm.",
+    "summary": "This table presents 90-day mortality data for patients receiving hydrocortisone versus a control group. The primary outcome appears to be the probability of a greater than 20% reduction in the odds of death. For the hydrocortisone group (n=536), the probability of this outcome was 6.5%, with a credible interval (CrI) of 5.4%. The control group (n=122) had a probability of 6.6% with a CrI of 5.2%. The text indicates that odds ratios less than 1 suggest improved outcomes. Specific strata showed odds ratios for mortality ranging from 1.52 to 1.63, with corresponding probabilities of a >20% reduction in odds of death between 3.3% and 7.1%.",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -57,7 +57,7 @@
     "element_id": "4a08fbfaaa6463115de54644e29e338d",
     "page_number": 11,
     "caption": "No caption",
-    "summary": "This table compares outcomes for patients receiving hydrocortisone versus control. It analyzes ICU mortality, ICU length of stay, ventilator-free days, organ support-free days, hospital length of stay, and progression to intubation, ECMO, or death. For ICU mortality, the median adjusted odds ratio for hydrocortisone was 1.49 (95% CrI: 0.62–4.18) in one group and 1.73 (95% CrI: 0.65–5.07) in another, with a high probability of harm (80.7% and 86.4%). Hydrocortisone showed a higher probability of superiority for ventilator-free days (72.8%) and organ support-free days (85.4% and 91.3%). Length of stay measures did not show a clear benefit for hydrocortisone.",
+    "summary": "This table compares outcomes between hydrocortisone and control groups for ICU patients. Key outcomes include ICU mortality, length of stay (LOS), ventilator-free days (VFD), and organ support-free days (OSFD). For ICU mortality, the median adjusted odds ratio (OR) for hydrocortisone was 1.49 (95% CrI: 0.62–4.18) in one subgroup and 1.73 (95% CrI: 0.65–5.07) in another, with a high probability of harm (80.7% and 86.4%). Hydrocortisone showed a higher probability of superiority for VFD (72.8% and 72.3%) and OSFD (85.4% and 91.3%). Hospital LOS did not show a clear benefit, with probabilities of harm exceeding 70%.",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
@@ -66,7 +66,7 @@
     "element_id": "1be7c2c5d23aa2d2168299d78585c545",
     "page_number": 12,
     "caption": "Table 3 (continued)",
-    "summary": "This table compares outcomes for patients receiving hydrocortisone versus control, both overall and in a subset at sites offering hydrocortisone. Key outcomes include rehabilitation hospital stays, transfers, ICU readmissions, and serious adverse events. The table also presents 90-day mortality data for patients with and without baseline mechanical ventilation. For patients without baseline mechanical ventilation, hydrocortisone showed a median adjusted odds ratio of 1.36 (95% CrI 0.47–4.68), with a 70.8% probability of harm. For those with baseline mechanical ventilation, the median adjusted odds ratio was 1.85 (95% CrI 0.67–5.61), with an 87.2% probability of harm.",
+    "summary": "This table compares outcomes for patients receiving hydrocortisone versus control, both overall and in a subset of sites offering hydrocortisone. Key outcomes include rehabilitation hospital transfers, acute hospital transfers, ICU readmissions, and serious adverse events. The table also presents 90-day mortality data for patients with and without baseline mechanical ventilation. For patients without baseline mechanical ventilation, hydrocortisone showed a median adjusted odds ratio of 1.36 (95% CrI 0.47–4.68), with a 29.2% probability of superiority and 70.8% probability of harm. For patients with baseline invasive mechanical ventilation, the median adjusted odds ratio was 1.85 (95% CrI 0.67–5.61), with a 12.8% probability of superiority and 87.2% probability of harm.",
     "model": "gemini-2.5-flash-lite",
     "has_table_text": true,
     "has_html": true
