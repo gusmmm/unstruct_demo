@@ -217,12 +217,20 @@ def _sanitize_article_dict(data: Dict[str, Any]) -> Dict[str, Any]:
     doi = cleaned.get("doi")
     if isinstance(doi, str):
         s = doi.strip()
+        # If a full URL was provided, try to extract the DOI path after doi.org/
+        m = re.search(r"doi\.org/([^\s]+)", s, flags=re.IGNORECASE)
+        if m:
+            s = m.group(1)
+        # Strip common prefixes
         for prefix in ("doi:", "DOI:", "DOI", "doi"):
             if s.lower().startswith(prefix.lower()):
-                s = s[len(prefix):].strip(" :")
-        # remove spaces and weird separators
-        s = re.sub(r"\s+", "", s)
+                s = s[len(prefix):].strip(" :/")
+        # Normalize unicode dashes to ascii hyphen
         s = s.replace("—", "-").replace("–", "-")
+        # Replace internal whitespace with hyphens (observed in PDFs splitting DOI chunks)
+        s = re.sub(r"\s+", "-", s)
+        # Trim trailing punctuation that might get captured
+        s = s.strip(" .,),;]")
         cleaned["doi"] = s or None
 
     # Canonical URL from DOI (override any malformed URL)

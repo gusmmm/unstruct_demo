@@ -116,3 +116,7 @@ def normalized_images_path(doc_dir: Path) -> Path:
 
 def normalized_tables_path(doc_dir: Path) -> Path:
     return normalized_dir(doc_dir) / "tables.jsonl"
+
+
+def normalized_references_path(doc_dir: Path) -> Path:
+    return normalized_dir(doc_dir) / "references.jsonl"
