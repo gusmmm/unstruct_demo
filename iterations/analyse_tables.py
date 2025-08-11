@@ -10,10 +10,14 @@ For each table, we include:
 - table_html (metadata.text_as_html if available)
 - associated_text (nearby NarrativeText / ListItem / UncategorizedText)
 
-Usage:
-  uv run iterations/analyse_tables.py \
-    --input ./files/hydrocortisone-output.json \
-    --out ./files/extracted/tables/tables_llm_dump.json
+Usage options:
+    # Preferred: point at the PDF, outputs will go to files/<stem>/extracted/tables
+    uv run iterations/analyse_tables.py --pdf /path/to/your.pdf
+
+    # Or explicit paths
+    uv run iterations/analyse_tables.py \
+        --input ./files/<stem>/<stem>-output.json \
+        --out ./files/<stem>/extracted/tables/tables_llm_dump.json
 """
 
 from __future__ import annotations
@@ -27,6 +31,12 @@ from typing import Any, Dict, Iterable, List, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("analyse_tables")
+from .common_paths import (
+    ensure_doc_dir,
+    elements_json_path,
+    tables_dump_path,
+    tables_dir as tables_html_dir,
+)
 
 
 TEXT_LIKE = {"NarrativeText", "ListItem", "UncategorizedText"}
@@ -181,8 +191,9 @@ def extract_tables(
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Extract Table elements to a JSON dump for RAG")
-    p.add_argument("--input", type=Path, default=Path("./files/hydrocortisone-output.json"))
-    p.add_argument("--out", type=Path, default=Path("./files/extracted/tables/tables_llm_dump.json"))
+    p.add_argument("--pdf", type=Path, default=None, help="Optional: path to the source PDF to infer doc folder")
+    p.add_argument("--input", type=Path, default=None)
+    p.add_argument("--out", type=Path, default=None)
     p.add_argument(
         "--html-dir",
         type=Path,
@@ -200,12 +211,25 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    if not args.input.exists():
-        logger.error("Input file not found: %s", args.input)
+    if args.pdf:
+        doc_dir = ensure_doc_dir(args.pdf)
+        input_path = elements_json_path(doc_dir)
+        out_path = tables_dump_path(doc_dir)
+        default_html_dir = tables_html_dir(doc_dir)
+        if args.html_dir is None:
+            args.html_dir = default_html_dir
+    else:
+        if not args.input or not args.out:
+            raise SystemExit("Either provide --pdf or both --input and --out")
+        input_path = Path(args.input)
+        out_path = Path(args.out)
+
+    if not input_path.exists():
+        logger.error("Input file not found: %s", input_path)
         raise SystemExit(1)
 
-    logger.info("Loading elements from %s", args.input)
-    elements = load_elements(args.input)
+    logger.info("Loading elements from %s", input_path)
+    elements = load_elements(input_path)
 
     html_files: Optional[List[Path]] = None
     if args.html_dir and args.html_dir.exists():
@@ -216,10 +240,10 @@ def main() -> None:
     tables = extract_tables(elements, html_files=html_files, html_max_chars=args.html_max_chars)
     logger.info("Selected %d Table elements", len(tables))
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as f:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
         json.dump(tables, f, ensure_ascii=False, indent=2)
-    logger.info("Wrote tables dump to %s", args.out)
+    logger.info("Wrote tables dump to %s", out_path)
 
 
 if __name__ == "__main__":

@@ -2,20 +2,20 @@
 Normalize table records for ChromaDB ingestion by joining the LLM dump with table
 summaries, producing JSONL records similar to papers_text.jsonl:
 
-  id: element_id
-  text: preferred text (summary if available, else table_text), prefixed with caption
-  metadata: {
+	id: element_id
+	text: preferred text (summary if available, else table_text), prefixed with caption
+	metadata: {
 	doc_id, page_number, caption, table_html_file, source_path,
 	element_type, has_summary, has_table_text, has_html
-  }
+	}
 
-Usage:
-  uv run iterations/normalize_images.py \
-	--dump ./files/extracted/tables/tables_llm_dump.json \
-	--summaries ./files/extracted/tables/tables_llm_summaries.json \
-	--out ./files/normalized/tables.jsonl
-
-Note: Although named normalize_images.py, this script normalizes TABLES as per RAG plan.
+Usage options:
+	uv run iterations/normalize_tables.py --pdf /path/to/your.pdf
+	# or explicit paths
+	uv run iterations/normalize_tables.py \
+		--dump ./files/<stem>/extracted/tables/tables_llm_dump.json \
+		--summaries ./files/<stem>/extracted/tables/tables_llm_summaries.json \
+		--out ./files/<stem>/normalized/tables.jsonl
 """
 
 from __future__ import annotations
@@ -29,6 +29,14 @@ from typing import Any, Dict, List, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("normalize_tables")
+
+# Standardized per-document paths
+from iterations.common_paths import (
+	ensure_doc_dir,
+	normalized_tables_path,
+	tables_dump_path,
+	tables_summaries_path,
+)
 
 
 def load_json(path: Path) -> Any:
@@ -96,21 +104,36 @@ def normalize_record(item: Dict[str, Any], summary_by_id: Dict[str, Dict[str, An
 
 def parse_args() -> argparse.Namespace:
 	p = argparse.ArgumentParser(description="Normalize tables by joining dump and summaries")
-	p.add_argument("--dump", type=Path, default=Path("./files/extracted/tables/tables_llm_dump.json"))
-	p.add_argument("--summaries", type=Path, default=Path("./files/extracted/tables/tables_llm_summaries.json"))
-	p.add_argument("--out", type=Path, default=Path("./files/normalized/tables.jsonl"))
+	p.add_argument("--pdf", type=Path, default=None, help="Optional: path to the source PDF to infer doc folder")
+	p.add_argument("--dump", type=Path, default=None)
+	p.add_argument("--summaries", type=Path, default=None)
+	p.add_argument("--out", type=Path, default=None)
 	p.add_argument("--min-chars", type=int, default=80, help="Skip rows with text shorter than this many characters")
 	return p.parse_args()
 
 
 def main() -> None:
 	args = parse_args()
-	args.out.parent.mkdir(parents=True, exist_ok=True)
 
-	dump = load_json(args.dump)
+	# Resolve paths either from --pdf or explicit args
+	if args.pdf:
+		doc_dir = ensure_doc_dir(args.pdf)
+		dump_path = tables_dump_path(doc_dir)
+		sums_path = tables_summaries_path(doc_dir)
+		out_path = normalized_tables_path(doc_dir)
+	else:
+		if not all([args.dump, args.summaries, args.out]):
+			raise SystemExit("Either provide --pdf or all of --dump, --summaries and --out")
+		dump_path = Path(args.dump)
+		sums_path = Path(args.summaries)
+		out_path = Path(args.out)
+
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+
+	dump = load_json(dump_path)
 	if not isinstance(dump, list):
 		raise ValueError("Dump must be a list")
-	sums = load_json(args.summaries)
+	sums = load_json(sums_path)
 	if not isinstance(sums, list):
 		raise ValueError("Summaries must be a list")
 
@@ -119,16 +142,16 @@ def main() -> None:
 
 	out_count = 0
 	skipped = 0
-	with args.out.open("w", encoding="utf-8") as f:
+	with out_path.open("w", encoding="utf-8") as f:
 		for item in dump:
-			rec = normalize_record(item, summary_by_id, source_path=str(args.dump))
+			rec = normalize_record(item, summary_by_id, source_path=str(dump_path))
 			if not rec or len(rec["text"]) < args.min_chars:
 				skipped += 1
 				continue
 			f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 			out_count += 1
 
-	logger.info("Wrote %d normalized table records to %s (skipped %d)", out_count, args.out, skipped)
+	logger.info("Wrote %d normalized table records to %s (skipped %d)", out_count, out_path, skipped)
 
 
 if __name__ == "__main__":

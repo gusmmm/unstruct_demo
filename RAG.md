@@ -12,12 +12,12 @@ Build an end-to-end RAG pipeline over scientific PDFs using the artifacts produc
 
 ## Current artifacts (from this repo)
 
-- Persisted elements (Unstructured): `files/hydrocortisone-output.json`
-- Images dump: `files/extracted/images/images_llm_dump.json`
-- Image summaries: `files/extracted/images/images_llm_summaries.json`
-- Tables dump: `files/extracted/tables/tables_llm_dump.json`
-- Table summaries: `files/extracted/tables/tables_llm_summaries.json`
-- References: `files/hydrocortisone-references.json` and `files/hydrocortisone-references.txt`
+- Persisted elements (Unstructured): `files/hydrocortisone/hydrocortisone-output.json`
+- Images dump: `files/hydrocortisone/extracted/images/images_llm_dump.json`
+- Image summaries: `files/hydrocortisone/extracted/images/images_llm_summaries.json`
+- Tables dump: `files/hydrocortisone/extracted/tables/tables_llm_dump.json`
+- Table summaries: `files/hydrocortisone/extracted/tables/tables_llm_summaries.json`
+- References: `files/hydrocortisone/hydrocortisone-references.json` and `files/hydrocortisone/hydrocortisone-references.txt`
 
 ## Index design (ChromaDB collections)
 
@@ -54,7 +54,7 @@ Create separate collections to keep semantics clear while allowing cross-source 
 ## Step-by-step plan
 
 1) Prepare extraction artifacts (already implemented in this repo)
-- Persist elements: run `iterations/V1_basic.py` to produce `hydrocortisone-output.json`.
+- Persist elements: run `uv run python -m iterations.v1_basic --pdf hydrocortisone.pdf` to produce `files/hydrocortisone/hydrocortisone-output.json` and create `files/hydrocortisone/extracted/{images,tables}` plus references files.
 - Extract papers_text: run `normalize_papers_text.py`.
 - Extract images dump + summarize: `iterations/analyse_images.py` then `iterations/images_summary.py`- normalization using `normalize_images.py`
 - Extract tables dump + summarize: `iterations/analyse_tables.py` then `iterations/tables_summary.py` - normalization using `normalize_tables.py`
@@ -62,11 +62,11 @@ Create separate collections to keep semantics clear while allowing cross-source 
 
 2) Normalize data for indexing
 - Create a small ingestion script that:
-	- Loads `hydrocortisone-output.json` and selects narrative/textual `Element` types (e.g., NarrativeText, Title, ListItem) and prepares chunk records for `papers_text`.
-	- Loads `tables_llm_dump.json` and joins with `tables_llm_summaries.json` by `element_id` to produce table records.
-	- Loads `images_llm_dump.json` and joins with `images_llm_summaries.json` by `element_id` to produce figure records.
-	- Loads references JSON/TXT, parsing into citation records.
-	- Writes temporary normalized JSON lines (one file per collection) under `./files/normalized/` for auditable ingestion.
+	- Loads `files/<stem>/<stem>-output.json` and selects narrative/textual `Element` types (e.g., NarrativeText, Title, ListItem) and prepares chunk records for `papers_text`.
+	- Loads `files/<stem>/extracted/tables/tables_llm_dump.json` and joins with `tables_llm_summaries.json` by `element_id` to produce table records.
+	- Loads `files/<stem>/extracted/images/images_llm_dump.json` and joins with `images_llm_summaries.json` by `element_id` to produce figure records.
+	- Loads references JSON/TXT in `files/<stem>/`, parsing into citation records.
+	- Writes temporary normalized JSON lines (one file per collection) under `files/<stem>/normalized/` for auditable ingestion.
 
 3) Configure Gemini embeddings
 - Model: `text-embedding-004` (recommended general-purpose embedding model).
@@ -182,28 +182,31 @@ All collections use: ids: List[str], embeddings: via Gemini, metadatas: Dict[str
 ## Try it (commands)
 
 ```bash
-# 1) (Optional) install missing deps
+# 0) (Optional) install missing deps
 uv add google-genai chromadb python-dotenv
 
-# 2) Summarize tables (already added)
-uv run iterations/tables_summary.py \
-	--input files/extracted/tables/tables_llm_dump.json \
-	--out files/extracted/tables/tables_llm_summaries.json \
-	--model gemini-2.5-flash-lite \
-	--max-tokens 250 \
-	--html-max-chars 8000
+# 1) Persist elements and extract assets into files/<stem>/
+uv run python -m iterations.v1_basic --pdf hydrocortisone.pdf
 
-# 3) Summarize images (already added)
-uv run iterations/images_summary.py \
-	--input files/extracted/images/images_llm_dump.json \
-	--out files/extracted/images/images_llm_summaries.json \
-	--model gemini-2.5-flash-lite \
-	--max-tokens 250
+# 2) Papers text normalization (writes files/<stem>/normalized/papers_text.jsonl)
+uv run python -m iterations.normalize_papers_text --pdf files/hydrocortisone/hydrocortisone.pdf
 
-# 4) (Next) Implement and run: ingest_to_chroma.py
+# 3) Tables: dump → summarize → normalize (all paths inferred from --pdf)
+uv run python -m iterations.analyse_tables --pdf files/hydrocortisone/hydrocortisone.pdf
+uv run python -m iterations.tables_summary --pdf files/hydrocortisone/hydrocortisone.pdf \
+	--model gemini-2.5-flash-lite --max-tokens 250 --html-max-chars 8000
+uv run python -m iterations.normalize_tables --pdf files/hydrocortisone/hydrocortisone.pdf
+
+# 4) Images: dump → summarize → normalize (all paths inferred from --pdf)
+uv run python -m iterations.analyse_images --pdf files/hydrocortisone/hydrocortisone.pdf
+uv run python -m iterations.images_summary --pdf files/hydrocortisone/hydrocortisone.pdf \
+	--model gemini-2.5-flash-lite --max-tokens 250
+uv run python -m iterations.normalize_images --pdf files/hydrocortisone/hydrocortisone.pdf
+
+# 5) (Next) Implement and run: ingest_to_chroma.py
 #    - creates collections and upserts vectors using Gemini embeddings
 
-# 5) (Next) Implement and run: rag_query.py
+# 6) (Next) Implement and run: rag_query.py
 #    - queries Chroma across collections and answers with grounded citations
 ```
 

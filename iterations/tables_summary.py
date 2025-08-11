@@ -3,11 +3,9 @@ Summarize Table elements for RAG: read tables_llm_dump.json, send caption + tabl
 (+ optional truncated HTML and nearby associated text) to Google GenAI, and save a per-table
 summary JSON.
 
-Usage:
-  uv run iterations/tables_summary.py \
-	--input ./files/extracted/tables/tables_llm_dump.json \
-	--out ./files/extracted/tables/tables_llm_summaries.json \
-	--model gemini-2.5-flash-lite
+Usage options:
+	uv run iterations/tables_summary.py --pdf /path/to/your.pdf --model gemini-2.5-flash-lite
+	# or provide explicit --input and --out
 """
 
 from __future__ import annotations
@@ -21,6 +19,11 @@ from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 from google import genai
+from iterations.common_paths import (
+	ensure_doc_dir,
+	tables_dump_path,
+	tables_summaries_path,
+)
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -121,12 +124,9 @@ def summarize_one(
 
 def parse_args() -> argparse.Namespace:
 	p = argparse.ArgumentParser(description="Summarize table elements via Google GenAI")
-	p.add_argument("--input", type=Path, default=Path("./files/extracted/tables/tables_llm_dump.json"))
-	p.add_argument(
-		"--out",
-		type=Path,
-		default=Path("./files/extracted/tables/tables_llm_summaries.json"),
-	)
+	p.add_argument("--pdf", type=Path, default=None, help="Optional: path to the source PDF to infer doc folder")
+	p.add_argument("--input", type=Path, default=None)
+	p.add_argument("--out", type=Path, default=None)
 	p.add_argument("--model", default="gemini-2.5-flash-lite")
 	p.add_argument("--max-tokens", type=int, default=250)
 	p.add_argument(
@@ -148,7 +148,17 @@ def main() -> None:
 
 	client = genai.Client(api_key=api_key)
 
-	items = load_dump(args.input)
+	if args.pdf:
+		doc_dir = ensure_doc_dir(args.pdf)
+		in_path = tables_dump_path(doc_dir)
+		out_path = tables_summaries_path(doc_dir)
+	else:
+		if not args.input or not args.out:
+			raise SystemExit("Either provide --pdf or both --input and --out")
+		in_path = Path(args.input)
+		out_path = Path(args.out)
+
+	items = load_dump(in_path)
 	logger.info("Loaded %d table entries", len(items))
 
 	results: List[Dict[str, Any]] = []
@@ -189,10 +199,10 @@ def main() -> None:
 			}
 		)
 
-	args.out.parent.mkdir(parents=True, exist_ok=True)
-	with args.out.open("w", encoding="utf-8") as f:
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+	with out_path.open("w", encoding="utf-8") as f:
 		json.dump(results, f, ensure_ascii=False, indent=2)
-	logger.info("Wrote %d summaries to %s", len(results), args.out)
+	logger.info("Wrote %d summaries to %s", len(results), out_path)
 
 
 if __name__ == "__main__":

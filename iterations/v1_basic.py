@@ -10,7 +10,7 @@ Features:
 - Extract bibliography/references section by heading
 
 Usage (from repo root with uv):
-  uv run iterations/v1_basic.py --pdf files/hydrocortisone.pdf --out-dir files
+	uv run python -m iterations.v1_basic --pdf /path/to/your.pdf --root files
 
 Notes:
 - For image/table crops, hi_res strategy requires unstructured-inference (detectron2_onnx).
@@ -31,6 +31,9 @@ from unstructured.partition.pdf import partition_pdf
 from unstructured.chunking.title import chunk_by_title
 from unstructured.staging.base import elements_to_json
 from unstructured.cleaners.core import clean, replace_unicode_quotes
+from iterations.common_paths import (
+	ensure_doc_dir,
+)
 
 
 # -----------------------
@@ -391,10 +394,11 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
 		required=True,
 		help="Path to input PDF",
 	)
+	# Base directory for all documents; outputs go under <root>/<pdf-stem>
 	parser.add_argument(
-		"--out-dir",
+		"--root",
 		default="files",
-		help="Directory to write outputs (default: files)",
+		help="Root output folder; the document folder will be created as <root>/<stem> (default: files)",
 	)
 	parser.add_argument(
 		"--log-level",
@@ -414,14 +418,27 @@ def main(argv: Optional[List[str]] = None) -> None:
 	)
 
 	pdf_path = Path(args.pdf).expanduser().resolve()
-	out_dir = Path(args.out_dir).expanduser().resolve()
 
 	if not pdf_path.exists():
 		logger.error("PDF not found: %s", pdf_path)
 		raise SystemExit(1)
 
-	logger.info("Running pipeline for %s", pdf_path)
-	outputs = run_pipeline(pdf_path, out_dir)
+	# Ensure document folder under <root>/<stem> and copy the PDF there
+	doc_dir = ensure_doc_dir(pdf_path)
+	# If the user customized root, prefer that base
+	if args.root:
+		custom_root = Path(args.root).expanduser().resolve()
+		custom_root.mkdir(parents=True, exist_ok=True)
+		doc_dir = custom_root / pdf_path.stem
+		doc_dir.mkdir(parents=True, exist_ok=True)
+		# Best-effort copy into custom doc dir as well
+		try:
+			(target_pdf := doc_dir / pdf_path.name).write_bytes(pdf_path.read_bytes())
+		except Exception:
+			pass
+
+	logger.info("Running pipeline for %s -> %s", pdf_path, doc_dir)
+	outputs = run_pipeline(pdf_path, doc_dir)
 
 	# Compact summary to log
 	logger.info("Artifacts written:")

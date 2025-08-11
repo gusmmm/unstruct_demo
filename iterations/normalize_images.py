@@ -9,12 +9,14 @@ with image summaries, producing JSONL records similar to papers_text.jsonl:
 	element_type, has_summary, has_image_binary, image_mime_type
   }
 
-Usage:
-  uv run iterations/normalize_images.py \
-	--dump ./files/extracted/images/images_llm_dump.json \
-	--summaries ./files/extracted/images/images_llm_summaries.json \
-	--out ./files/normalized/images.jsonl \
-	--doc-id hydrocortisone
+Usage options:
+	uv run iterations/normalize_images.py --pdf /path/to/your.pdf --doc-id <stem>
+	# or explicit paths
+	uv run iterations/normalize_images.py \
+		--dump ./files/<stem>/extracted/images/images_llm_dump.json \
+		--summaries ./files/<stem>/extracted/images/images_llm_summaries.json \
+		--out ./files/<stem>/normalized/images.jsonl \
+		--doc-id <stem>
 """
 
 from __future__ import annotations
@@ -28,6 +30,13 @@ from typing import Any, Dict, List, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("normalize_images")
+from iterations.common_paths import (
+	ensure_doc_dir,
+	images_dump_path,
+	images_summaries_path,
+	normalized_images_path,
+	doc_stem_from_pdf,
+)
 
 
 def load_json(path: Path) -> Any:
@@ -87,22 +96,37 @@ def normalize_record(item: Dict[str, Any], summary_by_id: Dict[str, Dict[str, An
 
 def parse_args() -> argparse.Namespace:
 	p = argparse.ArgumentParser(description="Normalize images by joining dump and summaries")
-	p.add_argument("--dump", type=Path, default=Path("./files/extracted/images/images_llm_dump.json"))
-	p.add_argument("--summaries", type=Path, default=Path("./files/extracted/images/images_llm_summaries.json"))
-	p.add_argument("--out", type=Path, default=Path("./files/normalized/images.jsonl"))
-	p.add_argument("--doc-id", type=str, default="document", help="Doc ID to store in metadata (e.g., hydrocortisone)")
+	p.add_argument("--pdf", type=Path, default=None, help="Optional: path to the source PDF to infer doc folder and doc-id")
+	p.add_argument("--dump", type=Path, default=None)
+	p.add_argument("--summaries", type=Path, default=None)
+	p.add_argument("--out", type=Path, default=None)
+	p.add_argument("--doc-id", type=str, default=None, help="Doc ID to store in metadata (e.g., hydrocortisone)")
 	p.add_argument("--min-chars", type=int, default=60, help="Skip rows with text shorter than this many characters")
 	return p.parse_args()
 
 
 def main() -> None:
 	args = parse_args()
-	args.out.parent.mkdir(parents=True, exist_ok=True)
+	if args.pdf:
+		doc_dir = ensure_doc_dir(args.pdf)
+		dump_path = images_dump_path(doc_dir)
+		sums_path = images_summaries_path(doc_dir)
+		out_path = normalized_images_path(doc_dir)
+		doc_id = doc_stem_from_pdf(Path(args.pdf))
+	else:
+		if not all([args.dump, args.summaries, args.out]):
+			raise SystemExit("Either provide --pdf or all of --dump, --summaries and --out")
+		dump_path = Path(args.dump)
+		sums_path = Path(args.summaries)
+		out_path = Path(args.out)
+		doc_id = args.doc_id or "document"
 
-	dump = load_json(args.dump)
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+
+	dump = load_json(dump_path)
 	if not isinstance(dump, list):
 		raise ValueError("Dump must be a list")
-	sums = load_json(args.summaries)
+	sums = load_json(sums_path)
 	if not isinstance(sums, list):
 		raise ValueError("Summaries must be a list")
 
@@ -111,16 +135,16 @@ def main() -> None:
 
 	out_count = 0
 	skipped = 0
-	with args.out.open("w", encoding="utf-8") as f:
+	with out_path.open("w", encoding="utf-8") as f:
 		for item in dump:
-			rec = normalize_record(item, summary_by_id, source_path=str(args.dump), default_doc_id=args.doc_id)
+			rec = normalize_record(item, summary_by_id, source_path=str(dump_path), default_doc_id=doc_id)
 			if not rec or len(rec["text"]) < args.min_chars:
 				skipped += 1
 				continue
 			f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 			out_count += 1
 
-	logger.info("Wrote %d normalized image records to %s (skipped %d)", out_count, args.out, skipped)
+	logger.info("Wrote %d normalized image records to %s (skipped %d)", out_count, out_path, skipped)
 
 
 if __name__ == "__main__":

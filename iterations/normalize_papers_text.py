@@ -2,17 +2,19 @@
 Extract narrative text chunks from Unstructured elements JSON, grouped by section titles,
 preserving semantic structure for RAG. Outputs JSONL suitable for a `papers_text` collection:
 
-  id: element_id (prefer the Title element id for the chunk, else first element id, else synthetic)
-  text: chunk text (concatenated narrative/list items under the section title)
-  metadata: {
+	id: element_id (prefer the Title element id for the chunk, else first element id, else synthetic)
+	text: chunk text (concatenated narrative/list items under the section title)
+	metadata: {
 	doc_id, page_number, title, section, source_path, element_type, parent_id,
 	first_page, last_page
-  }
+	}
 
-Usage:
-  uv run iterations/papers_text.py \
-	--input ./files/hydrocortisone-output.json \
-	--out ./files/normalized/papers_text.jsonl
+Usage options:
+	uv run iterations/normalize_papers_text.py --pdf /path/to/your.pdf
+	# or explicit paths
+	uv run iterations/normalize_papers_text.py \
+		--input ./files/<stem>/<stem>-output.json \
+		--out ./files/<stem>/normalized/papers_text.jsonl
 """
 
 from __future__ import annotations
@@ -31,6 +33,13 @@ logger = logging.getLogger("papers_text")
 TEXT_TYPES = {"NarrativeText", "ListItem"}
 TITLE_TYPE = "Title"
 SKIP_TYPES = {"Header", "Footer", "PageBreak", "FigureCaption", "Table"}
+
+# Standardized per-document paths
+from iterations.common_paths import (
+	ensure_doc_dir,
+	elements_json_path,
+	normalized_papers_text_path,
+)
 
 
 def load_elements(path: Path) -> List[Dict[str, Any]]:
@@ -197,39 +206,48 @@ def build_chunk(title_el: Dict[str, Any], content_els: List[Dict[str, Any]], doc
 
 def parse_args() -> argparse.Namespace:
 	p = argparse.ArgumentParser(description="Build papers_text chunks grouped by section titles")
-	p.add_argument("--input", type=Path, default=Path("./files/hydrocortisone-output.json"))
-	p.add_argument("--out", type=Path, default=Path("./files/normalized/papers_text.jsonl"))
+	p.add_argument("--pdf", type=Path, default=None, help="Optional: path to the source PDF to infer doc folder")
+	p.add_argument("--input", type=Path, default=None)
+	p.add_argument("--out", type=Path, default=None)
 	p.add_argument("--min-chars", type=int, default=200, help="Skip chunks with text shorter than this many characters")
 	return p.parse_args()
 
 
 def main() -> None:
 	args = parse_args()
-	args.out.parent.mkdir(parents=True, exist_ok=True)
 
-	elements = load_elements(args.input)
-	logger.info("Loaded %d elements", len(elements))
-
-	# Derive doc_id from input filename (e.g., hydrocortisone-output.json -> hydrocortisone)
-	stem = args.input.stem
-	if stem.endswith("-output"):
-		doc_id = stem[:-7]
+	# Resolve paths either from --pdf or explicit args
+	if args.pdf:
+		doc_dir = ensure_doc_dir(args.pdf)
+		in_path = elements_json_path(doc_dir)
+		out_path = normalized_papers_text_path(doc_dir)
+		doc_id = doc_dir.name
 	else:
-		doc_id = stem
+		if not all([args.input, args.out]):
+			raise SystemExit("Either provide --pdf or both --input and --out")
+		in_path = Path(args.input)
+		out_path = Path(args.out)
+		stem = in_path.stem
+		doc_id = stem[:-7] if stem.endswith("-output") else stem
+
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+
+	elements = load_elements(in_path)
+	logger.info("Loaded %d elements", len(elements))
 
 	records: List[Dict[str, Any]] = []
 	for title_el, content_els in iter_section_blocks(elements):
-		rec = build_chunk(title_el, content_els, doc_id=doc_id, source_path=str(args.input))
+		rec = build_chunk(title_el, content_els, doc_id=doc_id, source_path=str(in_path))
 		if not rec:
 			continue
 		if len(rec["text"]) < args.min_chars:
 			continue
 		records.append(rec)
 
-	with args.out.open("w", encoding="utf-8") as f:
+	with out_path.open("w", encoding="utf-8") as f:
 		for rec in records:
 			f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-	logger.info("Wrote %d section chunks to %s", len(records), args.out)
+	logger.info("Wrote %d section chunks to %s", len(records), out_path)
 
 
 if __name__ == "__main__":

@@ -9,10 +9,14 @@ Outputs a JSON list where each item has:
 - image_mime_type (if present)
 - page_number (if present)
 
-Usage:
-  uv run iterations/analyse_images.py \
-	--input ./files/hydrocortisone-output.json \
-	--out ./files/extracted/images/images_llm_dump.json
+Usage options:
+	# Preferred: point at the PDF, outputs will go to files/<stem>/extracted/images
+	uv run iterations/analyse_images.py --pdf /path/to/your.pdf
+
+	# Or use explicit input and out paths
+	uv run iterations/analyse_images.py \
+		--input ./files/<stem>/<stem>-output.json \
+		--out ./files/<stem>/extracted/images/images_llm_dump.json
 """
 
 from __future__ import annotations
@@ -27,6 +31,11 @@ from typing import Any, Dict, Iterable, List, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("analyse_images")
+from iterations.common_paths import (
+	ensure_doc_dir,
+	elements_json_path,
+	images_dump_path,
+)
 
 
 def load_elements(path: Path) -> List[Dict[str, Any]]:
@@ -142,28 +151,39 @@ def extract_images_payload(
 
 def parse_args() -> argparse.Namespace:
 	p = argparse.ArgumentParser(description="Create an LLM-ready dump of Image elements")
-	p.add_argument("--input", type=Path, default=Path("./files/hydrocortisone-output.json"), help="Path to elements JSON produced by v1_basic.py")
-	p.add_argument("--out", type=Path, default=Path("./files/extracted/images/images_llm_dump.json"), help="Where to write the images JSON dump")
+	p.add_argument("--pdf", type=Path, default=None, help="Optional: path to the source PDF to infer doc folder")
+	p.add_argument("--input", type=Path, default=None, help="Optional: elements JSON path; inferred from --pdf if omitted")
+	p.add_argument("--out", type=Path, default=None, help="Optional: output JSON path; inferred from --pdf if omitted")
 	return p.parse_args()
 
 
 def main() -> None:
 	args = parse_args()
-	if not args.input.exists():
-		logger.error("Input file not found: %s", args.input)
+	if args.pdf:
+		doc_dir = ensure_doc_dir(args.pdf)
+		input_path = elements_json_path(doc_dir)
+		out_path = images_dump_path(doc_dir)
+	else:
+		if not args.input or not args.out:
+			raise SystemExit("Either provide --pdf or both --input and --out")
+		input_path = Path(args.input)
+		out_path = Path(args.out)
+
+	if not input_path.exists():
+		logger.error("Input file not found: %s", input_path)
 		raise SystemExit(1)
 
-	logger.info("Loading elements from %s", args.input)
-	elements = load_elements(args.input)
+	logger.info("Loading elements from %s", input_path)
+	elements = load_elements(input_path)
 
 	root = Path(".").resolve()
 	images = extract_images_payload(elements, root)
 	logger.info("Found %d Image elements", len(images))
 
-	args.out.parent.mkdir(parents=True, exist_ok=True)
-	with args.out.open("w", encoding="utf-8") as f:
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+	with out_path.open("w", encoding="utf-8") as f:
 		json.dump(images, f, ensure_ascii=False, indent=2)
-	logger.info("Wrote image dump to %s", args.out)
+	logger.info("Wrote image dump to %s", out_path)
 
 
 if __name__ == "__main__":
