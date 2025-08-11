@@ -56,7 +56,7 @@ Create separate collections to keep semantics clear while allowing cross-source 
 1) Prepare extraction artifacts (already implemented in this repo)
 - Persist elements: run `iterations/V1_basic.py` to produce `hydrocortisone-output.json`.
 - Extract papers_text: run `normalize_papers_text.py`.
-- Extract images dump + summarize: `iterations/analyse_images.py` then `iterations/images_summary.py`-
+- Extract images dump + summarize: `iterations/analyse_images.py` then `iterations/images_summary.py`- normalization using `normalize_images.py`
 - Extract tables dump + summarize: `iterations/analyse_tables.py` then `iterations/tables_summary.py` - normalization using `normalize_tables.py`
 - Extract references (available in `files/hydrocortisone-references.*`).
 

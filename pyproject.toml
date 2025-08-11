@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "chromadb>=1.0.16",
+    "google-adk>=1.10.0",
     "google-genai>=1.29.0",
     "python-dotenv>=1.1.1",
     "unstructured[pdf]>=0.18.11",

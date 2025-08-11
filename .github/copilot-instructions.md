@@ -40,9 +40,21 @@
 
 # google genai agents
 - for all code related google genai AI agents check https://github.com/googleapis/python-genai
+- to generated structured output using pydantic models see first https://ai.google.dev/gemini-api/docs/structured-output
 
 # gemini embeddings
 - for gemini embeddings, check this url https://ai.google.dev/gemini-api/docs/embeddings?hl=en and this https://github.com/google-gemini/cookbook/blob/main/quickstarts/Embeddings.ipynb for upto-date information and examples.
 
 # vector database with chromadb
 - for vector database with chromadb, check this url https://github.com/google-gemini/cookbook/blob/23a8e7d7e88009e316275947db53ddb6630d38dd/examples/chromadb/Vectordb_with_chroma.ipynb for upto-date information and examples.
+
+# google adk agents
+- for all code related google adk agents check https://google.github.io/adk-docs/
+
+# RAG pipeline
+- the pdf files to be processed will be in the files folder, each file with its own subfolder. Ex: the hydrocortison.pdf is located in the folder ./files/hydrocortisone
+- the processed images will be saved in the corresponding subfolder images/ . This folder will also contain the images_llm_dump.json and images_llm_summaries.json.
+- the processed tables will be saved in the corresponding subfolder tables/ - This folder will contain the tables_llm_dump.json and tables_llm_summaries.json.
+- the normalized json will be saved in the corresponding subfolder normalized/ 
+
+
